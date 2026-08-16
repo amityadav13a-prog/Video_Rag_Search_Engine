@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Environment
+.env
+.env.*
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Generated data
+data/*
+!data/.gitkeep
+
+# Media
+*.mp4
+*.avi
+*.mov
+*.mkv
+*.wav
+*.mp3
+
+# ML models
+*.pt
+*.pth
+*.onnx
+models/
+
+# Qdrant local storage
+backend/qdrant_data/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
