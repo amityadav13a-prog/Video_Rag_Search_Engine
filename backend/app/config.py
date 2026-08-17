@@ -29,3 +29,5 @@ CLIP_COLLECTION = "video_visual_frames"  # Alias
 WHISPER_MODEL_SIZE = "base"  # Options: 'tiny', 'base', 'small', 'medium', 'large'
 EMBEDDING_MODEL_NAME = "all-MiniLM-L6-v2"
 CLIP_MODEL_NAME = "ViT-B-32"
+KNOWN_FACES_DIR = DATA_DIR / "known_faces"
+KNOWN_FACES_DIR.mkdir(parents=True, exist_ok=True)
