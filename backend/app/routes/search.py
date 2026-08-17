@@ -3,6 +3,7 @@ from pydantic import BaseModel
 
 from backend.app.services.embeddings import get_text_embedding, get_clip_text_embedding
 from backend.app.services.vector_store import search_text, search_clip
+from backend.app.services.rag import generate_answer
 
 router = APIRouter()
 
@@ -35,4 +36,10 @@ def search(request: SearchQuery):
         for r in clip_results_raw
     ]
 
-    return {"text_results": text_results, "visual_results": visual_results}
+    answer = generate_answer(request.query, text_results)
+
+    return {
+        "answer": answer,
+        "text_results": text_results,
+        "visual_results": visual_results
+    }

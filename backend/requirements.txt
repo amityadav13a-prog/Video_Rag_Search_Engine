@@ -14,4 +14,4 @@ pillow
 groq
 # face_recognition
 # dlib
-cmake
+# cmake
