@@ -8,7 +8,7 @@ router = APIRouter()
 class SearchQuery(BaseModel):
     query: str
     top_k: int = 5
-    min_score: float = 0.25
+    min_score: float = 0.20
 @router.post("/search")
 
 def search(request: SearchQuery):
