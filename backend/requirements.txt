@@ -1,0 +1,17 @@
+fastapi
+uvicorn[standard]
+python-multipart
+openai-whisper
+opencv-python
+sentence-transformers
+qdrant-client
+scenedetect<0.8
+easyocr
+python-dotenv
+ffmpeg-python
+open_clip_torch
+pillow
+groq
+# face_recognition
+# dlib
+cmake
