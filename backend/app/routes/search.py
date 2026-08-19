@@ -4,13 +4,11 @@ from backend.app.services.embeddings import get_text_embedding, get_clip_text_em
 from backend.app.services.vector_store import search_text, search_clip
 from backend.app.services.rag import generate_answer
 router = APIRouter()
-
 class SearchQuery(BaseModel):
     query: str
     top_k: int = 5
     min_score: float = 0.20
 @router.post("/search")
-
 def search(request: SearchQuery):
     if not request.query.strip():
         raise HTTPException(status_code=400, detail="Query cannot be empty")
@@ -23,7 +21,7 @@ def search(request: SearchQuery):
         clip_embedding = get_clip_text_embedding(request.query)
         clip_results_raw = search_clip(clip_embedding, request.top_k)
     except Exception as e:
-        clip_results_raw = []   # CLIP fail then too continiue for text
+        clip_results_raw = []   # CLIP fail then continiue for text
 
     text_results = [
         {
