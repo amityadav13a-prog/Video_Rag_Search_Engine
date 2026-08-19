@@ -4,11 +4,9 @@ def format_time(seconds: float)->str:
     s=int(seconds%60)
     return f"{m:02d}:{s:02d}"
 
-
 def _time_to_seconds(time_str:str)->float:
     m,s=time_str.split(":")
     return int(m)*60+int(s)
-
 
 def detect_scenes(video_path:str,threshold:float=22.0)->list:
     scene_list=detect(video_path,ContentDetector(threshold=threshold))
@@ -22,7 +20,6 @@ def detect_scenes(video_path:str,threshold:float=22.0)->list:
             "end":format_time(scene[1].get_seconds())
         })
     return scenes
-
 
 def find_scene_for_timestamp(timestamp_str: str, scenes: list) -> int:
     t = _time_to_seconds(timestamp_str)
