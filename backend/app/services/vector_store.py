@@ -10,7 +10,6 @@ def get_client():
         init_collections()
     return _client
 
-
 def init_collections():
     """Initializes collections if they don't already exist."""
     client=_client if _client else QdrantClient(path=str(QDRANT_PATH))
@@ -26,7 +25,6 @@ def init_collections():
             collection_name=CLIP_COLLECTION,
             vectors_config=VectorParams(size=512, distance=Distance.COSINE)
         )
-
 
 def upload_text_chunks(chunks: list, embeddings: list, video_name: str):
     client=get_client()
@@ -47,7 +45,6 @@ def upload_text_chunks(chunks: list, embeddings: list, video_name: str):
     ]
     client.upsert(collection_name=TEXT_COLLECTION, points=points)
 
-
 def upload_frame_embeddings(frames: list, video_name: str):
     client=get_client()
     existing_count=client.count(collection_name=CLIP_COLLECTION).count
@@ -61,11 +58,9 @@ def upload_frame_embeddings(frames: list, video_name: str):
     ]
     client.upsert(collection_name=CLIP_COLLECTION, points=points)
 
-
 def search_text(query_embedding: list, top_k: int = 5):
     client=get_client()
     return client.query_points(collection_name=TEXT_COLLECTION, query=query_embedding, limit=top_k).points
-
 
 def search_clip(query_embedding: list, top_k: int = 5):
     client=get_client()
