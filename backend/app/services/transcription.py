@@ -1,10 +1,8 @@
 import static_ffmpeg
 static_ffmpeg.add_paths()
-
 import ffmpeg
 import whisper
 from pathlib import Path
-
 from backend.app.config import AUDIO_DIR,TRANSCRIPTS_DIR,WHISPER_MODEL_SIZE
 from backend.app.services.text_cleaning import clean_text
 _whisper_model = None
@@ -15,7 +13,6 @@ def get_whisper_model():
         _whisper_model=whisper.load_model(WHISPER_MODEL_SIZE)
     return _whisper_model
 
-
 def extract_audio(video_path:str,output_audio_path:str=None)->str:
     video_path=Path(video_path)
     if output_audio_path:
@@ -25,12 +22,10 @@ def extract_audio(video_path:str,output_audio_path:str=None)->str:
     ffmpeg.input(str(video_path)).output(str(audio_path)).run(overwrite_output=True, quiet=True)
     return str(audio_path)
 
-
 def format_time(seconds:float)->str:
     m=int(seconds//60)
     s=int(seconds%60)
     return f"{m:02d}:{s:02d}"
-
 
 def transcribe_audio(audio_path:str,video_name:str="video")->list:
     model=get_whisper_model()
@@ -57,7 +52,6 @@ def transcribe_audio(audio_path:str,video_name:str="video")->list:
 
     return segments
 def chunk_transcript(segments, source="speech"):
-  #Speech segments ko standardized chunk format mein convert.
     chunks = []
     for seg in segments:
         chunks.append({
