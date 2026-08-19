@@ -1,27 +1,24 @@
-def chunk_text(text: str, chunk_size: int = 40, overlap: int = 10) -> list:
-    """Bade text ko chhote overlapping pieces mein todta hai (word-count based)."""
-    words = text.split()
-    if len(words) <= chunk_size:
+def chunk_text(text:str,chunk_size:int=40,overlap:int=10)->list:
+    # devide in overlapping pieces
+    words=text.split()
+    if len(words)<=chunk_size:
         return [text]
-
-    chunks = []
-    start = 0
-    while start < len(words):
-        end = start + chunk_size
-        chunk = " ".join(words[start:end])
+    chunks=[]
+    start=0
+    while start<len(words):
+        end=start+chunk_size
+        chunk=" ".join(words[start:end])
         chunks.append(chunk)
-        start += chunk_size - overlap
+        start+=chunk_size-overlap
     return chunks
 
 
-def chunk_segment(segment: dict, chunk_size: int = 40, overlap: int = 10) -> list:
-    """Ek Whisper/OCR segment ko, agar bada hai, chhote chunks mein todta hai.
-    Chhota hai toh wahi ek chunk ban jayega."""
-    pieces = chunk_text(segment["text"], chunk_size=chunk_size, overlap=overlap)
-    result = []
+def chunk_segment(segment:dict,chunk_size:int=40,overlap:int=10)->list:
+    pieces=chunk_text(segment["text"],chunk_size=chunk_size,overlap=overlap)
+    result=[]
     for piece in pieces:
-        new_seg = dict(segment)
-        new_seg["text"] = piece
+        new_seg=dict(segment)
+        new_seg["text"]=piece
         result.append(new_seg)
     return result
 
@@ -56,11 +53,10 @@ def create_final_chunks(whisper_chunks: list, ocr_chunks: list, scene_timestamps
     # Timestamp ke basis par sort karo
     all_raw_segments.sort(key=lambda x: x["start"])
 
-    # Aapke chunk_segment logic se bade segments ko split karo
-    final_chunks = []
+    #Aapke chunk_segment logic se bade segments ko split karo
+    final_chunks=[]
     for seg in all_raw_segments:
         if seg["text"].strip():
-            split_chunks = chunk_segment(seg)
+            split_chunks=chunk_segment(seg)
             final_chunks.extend(split_chunks)
-
     return final_chunks

@@ -1,23 +1,20 @@
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams, PointStruct
-
 from backend.app.config import QDRANT_PATH, TEXT_COLLECTION, CLIP_COLLECTION
-
 _client = None
-
 
 def get_client():
     global _client
     if _client is None:
-        _client = QdrantClient(path=str(QDRANT_PATH))
+        _client=QdrantClient(path=str(QDRANT_PATH))
         init_collections()
     return _client
 
 
 def init_collections():
     """Initializes collections if they don't already exist."""
-    client = _client if _client else QdrantClient(path=str(QDRANT_PATH))
-    existing = [c.name for c in client.get_collections().collections]
+    client=_client if _client else QdrantClient(path=str(QDRANT_PATH))
+    existing=[c.name for c in client.get_collections().collections]
     
     if TEXT_COLLECTION not in existing:
         client.create_collection(
@@ -32,9 +29,9 @@ def init_collections():
 
 
 def upload_text_chunks(chunks: list, embeddings: list, video_name: str):
-    client = get_client()
-    existing_count = client.count(collection_name=TEXT_COLLECTION).count
-    points = [
+    client=get_client()
+    existing_count=client.count(collection_name=TEXT_COLLECTION).count
+    points=[
         PointStruct(
             id=existing_count + i,
             vector=emb,
@@ -52,9 +49,9 @@ def upload_text_chunks(chunks: list, embeddings: list, video_name: str):
 
 
 def upload_frame_embeddings(frames: list, video_name: str):
-    client = get_client()
-    existing_count = client.count(collection_name=CLIP_COLLECTION).count
-    points = [
+    client=get_client()
+    existing_count=client.count(collection_name=CLIP_COLLECTION).count
+    points=[
         PointStruct(
             id=existing_count + i,
             vector=f["embedding"],
@@ -66,10 +63,10 @@ def upload_frame_embeddings(frames: list, video_name: str):
 
 
 def search_text(query_embedding: list, top_k: int = 5):
-    client = get_client()
+    client=get_client()
     return client.query_points(collection_name=TEXT_COLLECTION, query=query_embedding, limit=top_k).points
 
 
 def search_clip(query_embedding: list, top_k: int = 5):
-    client = get_client()
+    client=get_client()
     return client.query_points(collection_name=CLIP_COLLECTION, query=query_embedding, limit=top_k).points
