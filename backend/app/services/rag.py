@@ -38,7 +38,7 @@ Question: {query}
 Instructions:
 - Answer using ONLY the information in the context above.
 - Mention the relevant timestamp in your answer.
-- If the context doesn't contain the answer, say "sorry, I don't have enough information to answer that question."
+- If the context doesn't contain the answer, say "sorry, I don't have enough information to answer this question."
 - Keep the answer concise (2-4 sentences).
 
 Answer:"""
@@ -47,12 +47,9 @@ Answer:"""
 def generate_answer(query: str, text_results: list) -> str:
     if not text_results:
         return "No relevant content found in the video for this query."
-
     context = build_context(text_results)
     prompt = build_prompt(query, context)
-
     client = get_groq_client()
-
     response = client.chat.completions.create(
         model="openai/gpt-oss-20b",  # Aapki active model list se exact name
         messages=[{"role": "user", "content": prompt}],
