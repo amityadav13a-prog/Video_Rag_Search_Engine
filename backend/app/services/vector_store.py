@@ -10,6 +10,7 @@ def get_client():
         init_collections()
     return _client
 
+
 def init_collections():
     """Initializes collections if they don't already exist."""
     client=_client if _client else QdrantClient(path=str(QDRANT_PATH))

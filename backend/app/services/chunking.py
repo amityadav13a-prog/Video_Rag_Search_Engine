@@ -12,7 +12,6 @@ def chunk_text(text:str,chunk_size:int=40,overlap:int=10)->list:
         start+=chunk_size-overlap
     return chunks
 
-
 def chunk_segment(segment:dict,chunk_size:int=40,overlap:int=10)->list:
     pieces=chunk_text(segment["text"],chunk_size=chunk_size,overlap=overlap)
     result=[]
@@ -24,13 +23,9 @@ def chunk_segment(segment:dict,chunk_size:int=40,overlap:int=10)->list:
 
 
 def create_final_chunks(whisper_chunks: list, ocr_chunks: list, scene_timestamps: list = None) -> list:
-    """
-    upload.py pipeline ke liye main entry function:
-    Whisper aur OCR chunks ko process aur split karke aggregate final chunks banata hai.
-    """
     all_raw_segments = []
 
-    # Whisper segments collect karo
+    # Whisper segments collect
     for w in whisper_chunks:
         all_raw_segments.append({
             "text": w.get("text", ""),
@@ -40,7 +35,7 @@ def create_final_chunks(whisper_chunks: list, ocr_chunks: list, scene_timestamps
             "scene": w.get("scene")
         })
 
-    # OCR segments collect karo
+    # OCR segments collect
     for o in ocr_chunks:
         all_raw_segments.append({
             "text": o.get("text", ""),
@@ -50,10 +45,9 @@ def create_final_chunks(whisper_chunks: list, ocr_chunks: list, scene_timestamps
             "scene": o.get("scene")
         })
 
-    # Timestamp ke basis par sort karo
+    # sort
     all_raw_segments.sort(key=lambda x: x["start"])
 
-    #Aapke chunk_segment logic se bade segments ko split karo
     final_chunks=[]
     for seg in all_raw_segments:
         if seg["text"].strip():
