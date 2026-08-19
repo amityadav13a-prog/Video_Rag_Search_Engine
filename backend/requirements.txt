@@ -12,6 +12,6 @@ ffmpeg-python
 open_clip_torch
 pillow
 groq
-# face_recognition
-# dlib
+face_recognition
+dlib
 # cmake
