@@ -39,3 +39,26 @@ backend/qdrant_data/
 # OS
 .DS_Store
 Thumbs.db
+
+data/uploads/*
+data/audio/*
+qdrant_data/
+__pycache__/
+*.pyc
+node_modules/
+
+
+firebase-key.json
+
+.env
+.venv/
+firebase-key.json
+data/uploads/*
+data/audio/*
+data/transcripts/*
+qdrant_data/
+backend/qdrant_data/
+node_modules/
+dist/
+
+firebase-key.json.json
