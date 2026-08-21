@@ -28,18 +28,18 @@ def build_context(text_results: list) -> str:
 
 
 def build_prompt(query: str, context: str) -> str:
-    return f"""You are a helpful assistant that answers questions based on a video's transcript and slide text.
+    return f"""You are an intelligent video search assistant. Based on the following transcript snippets and timestamps retrieved from a video, answer the user's question clearly.
 
-Context (from the video):
+Retrieved Context from Video:
 {context}
 
-Question: {query}
+User Question: {query}
 
 Instructions:
-- Answer using ONLY the information in the context above.
-- Mention the relevant timestamp in your answer.
-- If the context doesn't contain the answer, say "sorry, I don't have enough information to answer this question."
-- Keep the answer concise (2-4 sentences).
+- Use the context to answer the user's question or explain what is being discussed at those timestamps.
+- Explicitly mention the relevant timestamps (e.g., "At 724.7s...") in your answer.
+- Even if the context is brief or partial, synthesize a useful summary based on what is present rather than rejecting the query.
+- Keep the response clear, accurate, and concise (2-4 sentences).
 
 Answer:"""
 
