@@ -1,7 +1,6 @@
 import json
 from datetime import datetime
 from pathlib import Path
-
 from backend.app.config import DATA_DIR
 
 HISTORY_FILE = DATA_DIR / "history.json"
@@ -19,7 +18,7 @@ def _save(data):
 
 
 def log_upload(video_name: str, user_id: str, status: str = "processed"):
-    """Upload record mein user_id store karta hai."""
+    """user id stored in Upload record"""
     data = _load()
     data["uploads"].append({
         "video_name": video_name,
@@ -44,7 +43,7 @@ def log_search(query: str, user_id: str, results_count: int, top_timestamp: str 
 
 
 def get_history(user_id: str):
-    """Sirf current logged-in user ka history filter karke return karta hai."""
+    #returns the history of current user
     data = _load()
     user_uploads = [item for item in data["uploads"] if item.get("user_id") == user_id]
     user_searches = [item for item in data["searches"] if item.get("user_id") == user_id]
@@ -52,7 +51,6 @@ def get_history(user_id: str):
 
 
 def get_stats(user_id: str):
-    """Sirf current user ke uploads aur searches par stats calculate karta hai."""
     data = get_history(user_id)
     total_results = sum(s.get("results_count", 0) for s in data["searches"])
     return {
