@@ -1,6 +1,6 @@
-import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { Home, Upload, Search, Clock, User, LogOut, PlayCircle } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 const navItems = [
   { to: '/', label: 'Dashboard', icon: Home },
@@ -11,6 +11,17 @@ const navItems = [
 ];
 
 export default function Sidebar() {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login');
+  };
+
+  const displayName = user?.displayName || user?.email?.split('@')[0] || 'User';
+  const avatarInitial = displayName.charAt(0).toUpperCase();
+
   return (
     <aside className="w-64 h-screen bg-[#12121c] border-r border-white/10 flex flex-col fixed left-0 top-0">
       <div className="flex items-center gap-2 px-6 py-6">
@@ -29,9 +40,7 @@ export default function Sidebar() {
             end={to === '/'}
             className={({ isActive }) =>
               `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
-                isActive
-                  ? 'bg-indigo-500/20 text-indigo-300'
-                  : 'text-white/60 hover:bg-white/5 hover:text-white'
+                isActive ? 'bg-indigo-500/20 text-indigo-300' : 'text-white/60 hover:bg-white/5 hover:text-white'
               }`
             }
           >
@@ -42,17 +51,21 @@ export default function Sidebar() {
       </nav>
 
       <div className="px-6 text-xs text-white/30 font-medium mb-2 mt-8">ACCOUNT</div>
-      <button className="flex items-center gap-3 px-6 py-2.5 text-sm text-red-400 hover:bg-red-500/10 transition-colors mx-3 rounded-xl">
+      <button
+        onClick={handleLogout}
+        className="flex items-center gap-3 px-6 py-2.5 text-sm text-red-400 hover:bg-red-500/10 transition-colors mx-3 rounded-xl"
+      >
         <LogOut size={18} /> Logout
       </button>
 
+      {/* User Profile Footer Section */}
       <div className="mt-auto p-4 border-t border-white/10 flex items-center gap-3">
-        <div className="w-9 h-9 rounded-full bg-indigo-500 flex items-center justify-center text-sm font-semibold">
-          U
+        <div className="w-9 h-9 rounded-full bg-indigo-500 flex items-center justify-center text-sm font-semibold text-white">
+          {avatarInitial}
         </div>
-        <div className="text-sm">
-          <p className="font-medium">User</p>
-          <p className="text-white/40 text-xs">user@example.com</p>
+        <div className="text-sm overflow-hidden">
+          <p className="font-medium truncate text-white">{displayName}</p>
+          <p className="text-white/40 text-xs truncate">{user?.email}</p>
         </div>
       </div>
     </aside>

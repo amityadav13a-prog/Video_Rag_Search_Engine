@@ -20,7 +20,7 @@ export default function Dashboard() {
       setActivity(historyRes.data.recent_activity.slice(0, 5));
       setRecentSearches(historyRes.data.recent_searches.slice(0, 3));
     } catch (err) {
-      console.error(err);
+      console.error("Error loading dashboard data:", err);
     }
   };
 
@@ -30,9 +30,13 @@ export default function Dashboard() {
 
   const handleQuickSearch = async () => {
     if (!quickQuery.trim()) return;
-    await searchVideo(quickQuery);
-    setQuickQuery('');
-    loadData();
+    try {
+      await searchVideo(quickQuery);
+      setQuickQuery('');
+      loadData();
+    } catch (err) {
+      console.error("Search failed:", err);
+    }
   };
 
   const handleUpload = async () => {
@@ -41,7 +45,11 @@ export default function Dashboard() {
     try {
       await uploadVideo(file);
       setFile(null);
+      alert("Video uploaded successfully! Processing started in background.");
       loadData();
+    } catch (err) {
+      console.error("Upload failed:", err);
+      alert("Upload failed. Please check console for details.");
     } finally {
       setUploading(false);
     }
@@ -126,7 +134,7 @@ export default function Dashboard() {
                 placeholder="e.g. where is gradient descent?"
                 className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm outline-none focus:border-indigo-400/50"
               />
-              <button onClick={handleQuickSearch} className="px-4 py-2 bg-indigo-500 rounded-lg text-sm font-medium">Search</button>
+              <button onClick={handleQuickSearch} className="px-4 py-2 bg-indigo-500 rounded-lg text-sm font-medium hover:bg-indigo-600 transition">Search</button>
             </div>
           </div>
 
@@ -140,17 +148,18 @@ export default function Dashboard() {
             <button
               onClick={handleUpload}
               disabled={!file || uploading}
-              className="w-full mt-3 py-2.5 bg-indigo-500 rounded-lg text-sm font-medium disabled:opacity-40"
+              className="w-full mt-3 py-2.5 bg-indigo-500 rounded-lg text-sm font-medium disabled:opacity-40 hover:bg-indigo-600 transition"
             >
-              {uploading ? 'Uploading...' : 'Choose File'}
+              {uploading ? 'Uploading & Processing...' : 'Upload Video'}
             </button>
           </div>
         </div>
       </div>
 
       <div className="bg-white/5 border border-white/10 rounded-2xl p-6 mt-6">
-        <h3 className="font-semibold mb-4 flex items-center gap-2"><Clock size={16} /> Recent Searches</h3>
+        <h3 className="font-semibold mb-4 flex items-center gap-2"><Clock size5={16} /> Recent Searches</h3>
         <div className="space-y-1">
+          {recentSearches.length === 0 && <p className="text-white/40 text-sm">No recent searches yet.</p>}
           {recentSearches.map((s, i) => (
             <div key={i} className="flex items-center justify-between py-3 border-b border-white/5 last:border-0">
               <div className="flex items-center gap-3">
