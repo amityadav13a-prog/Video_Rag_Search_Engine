@@ -5,8 +5,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import os
 import firebase_admin
-from app.routes import upload, search, faces, history
-from app.services.vector_store import init_collections
+from backend.app.routes import upload, search, faces, history
+from backend.app.services.vector_store import init_collections
 
 try:
     firebase_admin.get_app()
