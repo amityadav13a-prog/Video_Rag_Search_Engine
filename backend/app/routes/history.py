@@ -1,16 +1,16 @@
-from fastapi import APIRouter
-
+from fastapi import APIRouter, Depends
+from backend.app.services.auth import get_current_user
 from backend.app.services.history import get_history, get_stats
 
 router = APIRouter()
 
-
-@router.get("/history")
-def history():
-    data = get_history()
+@router.get("")
+@router.get("/")
+def history(user_id: str = Depends(get_current_user)):
+    data = get_history(user_id)
     recent = []
 
-    for u in data["uploads"]:
+    for u in data.get("uploads", []):
         recent.append({
             "type": "upload",
             "title": u["video_name"],
@@ -19,7 +19,7 @@ def history():
             "timestamp": u["timestamp"]
         })
 
-    for s in data["searches"]:
+    for s in data.get("searches", []):
         recent.append({
             "type": "search",
             "title": s["query"],
@@ -30,9 +30,13 @@ def history():
         })
 
     recent.sort(key=lambda x: x["timestamp"], reverse=True)
-    return {"recent_activity": recent, "recent_searches": data["searches"][::-1]}
+    return {
+        "recent_activity": recent, 
+        "recent_searches": data.get("searches", [])[::-1]
+    }
 
 
 @router.get("/stats")
-def stats():
-    return get_stats()
+def stats(user_id: str = Depends(get_current_user)):
+   #returns the stats of current user
+    return get_stats(user_id)

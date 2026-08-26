@@ -3,9 +3,8 @@ import shutil
 import cv2
 from PIL import Image
 from pathlib import Path
-from fastapi import APIRouter, UploadFile, File, BackgroundTasks, HTTPException
+from fastapi import APIRouter, UploadFile, File, BackgroundTasks, HTTPException, Depends
 from pydantic import BaseModel
-
 from backend.app.config import UPLOAD_DIR, AUDIO_DIR, FRAMES_DIR, DELETE_VIDEO_AFTER_PROCESSING
 from backend.app.services.transcription import extract_audio, transcribe_audio
 from backend.app.services.ocr import extract_frames_ocr
@@ -16,6 +15,8 @@ from backend.app.services.vector_store import upload_text_chunks, upload_frame_e
 from backend.app.services.face_recognition_service import detect_faces_in_video
 from backend.app.services.youtube import download_youtube_video
 from backend.app.services.history import log_upload
+# Auth service
+from backend.app.services.auth import get_current_user
 
 router = APIRouter()
 
@@ -25,7 +26,7 @@ processing_status = {}
 class YouTubeRequest(BaseModel):
     url: str
 
-def extract_frames(video_path: str, interval_seconds: int = 5):
+def extract_frames(video_path: str, interval_seconds: int=5):
     cap = cv2.VideoCapture(video_path)
     fps = cap.get(cv2.CAP_PROP_FPS) or 25
     frame_count = 0
@@ -47,7 +48,7 @@ def extract_frames(video_path: str, interval_seconds: int = 5):
     cap.release()
     return frames
 
-def process_video_pipeline(video_path: str, filename: str):
+def process_video_pipeline(video_path: str, filename: str, user_id: str):
     """Background pipeline to process audio, OCR, scenes, face recognition & embeddings."""
     audio_path = os.path.join(AUDIO_DIR, f"{filename}.wav")
     try:
@@ -56,7 +57,7 @@ def process_video_pipeline(video_path: str, filename: str):
 
         processing_status[filename]["step"] = "transcribing speech"
         whisper_chunks = transcribe_audio(audio_path, video_name=filename)
-  
+ 
         processing_status[filename]["step"] = "detecting scenes"
         scene_timestamps = detect_scenes(video_path)
 
@@ -95,9 +96,9 @@ def process_video_pipeline(video_path: str, filename: str):
             "faces_detected": len(face_results)
         }
 
-        log_upload(filename, status="completed")
+        # upload with User id
+        log_upload(filename, status="completed", user_id=user_id)
 
-        # Video & Audio Auto-Cleanup
         if DELETE_VIDEO_AFTER_PROCESSING:
             if os.path.exists(video_path):
                 os.remove(video_path)
@@ -106,21 +107,25 @@ def process_video_pipeline(video_path: str, filename: str):
 
     except Exception as e:
         processing_status[filename] = {"status": "failed", "error": str(e)}
-        log_upload(filename, status="failed")
+        log_upload(filename, status="failed", user_id=user_id)
 
-        # Cleanup on Error
         if DELETE_VIDEO_AFTER_PROCESSING:
             if os.path.exists(video_path):
                 os.remove(video_path)
             if os.path.exists(audio_path):
                 os.remove(audio_path)
 
-@router.post("/upload")
-async def upload_video(background_tasks: BackgroundTasks, file: UploadFile = File(...)):
+@router.post("")
+@router.post("/")
+async def upload_video(
+    background_tasks: BackgroundTasks, 
+    file: UploadFile = File(...),
+    user_id: str = Depends(get_current_user)
+):
     file_ext = Path(file.filename).suffix.lower()
     if file_ext not in ALLOWED_EXTENSIONS:
         raise HTTPException(
-            status_code=400, 
+            status_code=400,
             detail=f"Unsupported file format '{file_ext}'. Allowed formats: {', '.join(ALLOWED_EXTENSIONS)}"
         )
 
@@ -130,16 +135,20 @@ async def upload_video(background_tasks: BackgroundTasks, file: UploadFile = Fil
         shutil.copyfileobj(file.file, buffer)
 
     processing_status[file.filename] = {"status": "queued"}
-    background_tasks.add_task(process_video_pipeline, file_path, file.filename)
+    background_tasks.add_task(process_video_pipeline, file_path, file.filename, user_id)
 
     return {
         "message": "Video uploaded, processing started in background",
         "video_name": file.filename,
-        "status_check_url": f"/api/status/{file.filename}"
+        "status_check_url": f"/api/upload/status/{file.filename}"
     }
 
-@router.post("/upload/youtube")
-async def upload_youtube_video(request: YouTubeRequest, background_tasks: BackgroundTasks):
+@router.post("/youtube")
+async def upload_youtube_video(
+    request: YouTubeRequest, 
+    background_tasks: BackgroundTasks,
+    user_id: str = Depends(get_current_user)
+):
     """YouTube URL se video download karke process karta hai."""
     try:
         video_path, video_name = download_youtube_video(request.url)
@@ -147,14 +156,14 @@ async def upload_youtube_video(request: YouTubeRequest, background_tasks: Backgr
         raise HTTPException(status_code=400, detail=f"Failed to download video: {str(e)}")
 
     processing_status[video_name] = {"status": "queued"}
-    background_tasks.add_task(process_video_pipeline, video_path, video_name)
+    background_tasks.add_task(process_video_pipeline, video_path, video_name, user_id)
 
     return {
         "message": "YouTube video downloaded, processing started in background",
         "video_name": video_name,
-        "status_check_url": f"/api/status/{video_name}"
+        "status_check_url": f"/api/upload/status/{video_name}"
     }
 
 @router.get("/status/{video_name}")
-def get_status(video_name: str):
+def get_status(video_name: str, user_id: str = Depends(get_current_user)):
     return processing_status.get(video_name, {"status": "not found"})
