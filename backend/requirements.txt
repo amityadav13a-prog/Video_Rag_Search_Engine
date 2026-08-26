@@ -15,6 +15,7 @@ groq
 firebase-admin
 yt-dlp
 httpx
+static-ffmpeg
 pytest
 # face_recognition
 # dlib
