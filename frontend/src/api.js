@@ -5,9 +5,10 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api';
 
 const API = axios.create({
   baseURL: API_URL,
+  timeout: 60000,
 });
 
-// Helper function:wait unlit firebase load user
+// Helper function: wait until firebase loads user
 const waitForAuthUser = (auth) => {
   return new Promise((resolve) => {
     if (auth.currentUser) {
@@ -27,14 +28,11 @@ API.interceptors.request.use(async (config) => {
   try {
     const user = await waitForAuthUser(auth);
     if (user) {
-      const token = await user.getIdToken(true);
+      const token = await user.getIdToken(false);
       config.headers.Authorization = `Bearer ${token}`;
-      console.log("Token attached successfully for:", user.email);
-    } else {
-      console.warn("No user found even after waiting!");
     }
   } catch (err) {
-    console.error("Error in auth interceptor:", err);
+    console.error("Error attaching auth token:", err);
   }
 
   return config;
@@ -54,8 +52,12 @@ export const uploadYoutubeVideo = async (url) => {
   return API.post('/upload/youtube', { url });
 };
 
-export const searchVideo = async (query, top_k = 5) => {
-  return API.post('/search', { query, top_k, min_score: 0.2 });
+export const getVideoStatus = async (videoName) => {
+  return API.get(`/upload/status/${encodeURIComponent(videoName)}`);
+};
+
+export const searchVideo = async (query, top_k = 5, min_score = 0.2) => {
+  return API.post('/search', { query, top_k, min_score });
 };
 
 export const getStats = async () => {
@@ -65,3 +67,14 @@ export const getStats = async () => {
 export const getHistory = async () => {
   return API.get('/history');
 };
+
+export const checkApiHealth = async () => {
+  try {
+    const res = await axios.get(API_URL.replace('/api', ''), { timeout: 3000 });
+    return res.status === 200;
+  } catch {
+    return false;
+  }
+};
+
+export default API;

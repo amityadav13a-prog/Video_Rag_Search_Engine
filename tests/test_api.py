@@ -1,6 +1,8 @@
 from fastapi.testclient import TestClient
 from backend.app.main import app
+from backend.app.services.auth import get_current_user
 
+app.dependency_overrides[get_current_user] = lambda: "test_user_id"
 client = TestClient(app)
 
 
@@ -21,5 +23,4 @@ def test_search_valid_query():
     data = response.json()
     assert "text_results" in data
     assert "visual_results" in data
-    assert "answer" in data
-    # to test pytest tests/
+    assert "answer" in data
